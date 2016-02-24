@@ -114,31 +114,6 @@ function handleEvent($object, $fromUsername, $toUsername)
     }
 }
 
-//客人发送图片的识别
-function handleImage($postObj)
-{
-    include "mysql.php";
-    $fromUsername = $postObj->FromUserName;
-    $toUsername = $postObj->ToUserName;
-    $PicUrl = $postObj->PicUrl;
-    $MediaId = $postObj->MediaId;
-    $MsgId = $postObj->MsgId;
-
-    mysql_query("INSERT INTO WX_Image_Receive (WX_OpenID,PicUrl,MediaId,MsgId) VALUES ('" . $fromUsername . "','" . $PicUrl . "','" . $MediaId . "','" . $MsgId . "')") or die(mysql_error());
-    mysql_close($link);
-
-    $Contentstr = "您好，图片接收成功";
-
-    echo responseText($fromUsername, $toUsername, $Contentstr);
-}
-
-//统计客人的点击情况
-function handleClick($fromUsername, $click)
-{
-    include "mysql.php";
-    mysql_query("INSERT INTO WX_Click_Hits (WX_OpenID,Click) VALUES ('" . $fromUsername . "','" . $click . "')") or die(mysql_error());
-    mysql_close($link);
-}
 
 /*
 * 获取客人信息，并插入wx_user_info表中；

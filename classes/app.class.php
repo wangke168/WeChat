@@ -31,42 +31,39 @@ class wechatCallbackapi
         include("inc/Activity.php");
         include("inc/active.php");
         include("inc/event.php");
-        include("inc/response.php");
+//        include("inc/response.php");
         @$postStr = $GLOBALS["HTTP_RAW_POST_DATA"];
 
-        //extract post data
         if (!empty($postStr)) {
 
-            // 先返回一个信号
-            ignore_user_abort(true);
-            ob_start();
-            // do initial processing here
-            echo 'success'; // send the response
-            header('Connection: close');
-            header('Content-Length: ' . ob_get_length());
-            ob_end_flush();
-            ob_flush();
-            flush();
+                        ignore_user_abort(true);
+                        ob_start();
+                        // do initial processing here
+                        echo 'success'; // send the response
+                        header('Connection: close');
+                        header('Content-Length: ' . ob_get_length());
+                        ob_end_flush();
+                        ob_flush();
+                        flush();
 
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-            $fromUsername = $postObj->FromUserName;
-            $toUsername = $postObj->ToUserName;
-            $time = time();
+
             $RX_TYPE = trim($postObj->MsgType);
 
             //检测客人的操作，文本，事件或其他
+            $handle=new handle();
             switch ($RX_TYPE) {
                 case "text":
-                    $this->handleText($postObj);
+                    $handle->handleText($postObj);
                     break;
                 case "event":
-                    handleEvent($postObj, $fromUsername, $toUsername);
+                    $handle->handleEvent($postObj);
                     break;
                 case "image";
-                    handleImage($postObj);
+                    $handle->handleImage($postObj);
                     break;
                 case "voice";
-                    handleVoice($postObj);
+                    $handle->handleVoice($postObj);
                     break;
                 /*
                 case "location":
@@ -81,7 +78,6 @@ class wechatCallbackapi
                     $resultStr = "Unknow msg type: " . $RX_TYPE;
                     break;
             }
-//                echo $resultStr;
         } else {
             echo "";
             exit;
@@ -92,10 +88,7 @@ class wechatCallbackapi
     {
 
         $fromUsername = $postObj->FromUserName;
-        $toUsername = $postObj->ToUserName;
         $keyword = trim($postObj->Content);
-        //  $msgId = $postObj->MsgId;
-        //   $time = time();
 
 
         /*     require_once 'BaeMemcache.class.php';
@@ -110,16 +103,18 @@ class wechatCallbackapi
              {
                  */
         if (!empty($keyword)) {
-            if (return_user_info($fromUsername, "eventkey") == '8888') {
+            if (return_user_info($fromUsername, "eventkey") == '8811') {
                 $temp_array = array();
                 $temp_array = str_split($keyword, 27);
                 if ($temp_array[0] == '去横店穿越去横店飞') {
                     responseV_Text($fromUsername, "cg");
                 } else {
-                    handleText_normal($fromUsername, $keyword);
+                    $responseMsg=new responseMsg();
+                    $responseMsg->handleText_normal($fromUsername,$keyword);
                 }
             } else {
-                handleText_normal($fromUsername, $keyword);
+                $responseMsg=new responseMsg();
+                $responseMsg->handleText_normal($fromUsername,$keyword);
 
             }
         }
@@ -134,12 +129,12 @@ class wechatCallbackapi
         $token = TOKEN;
         $tmpArr = array($token, $timestamp, $nonce);
         sort($tmpArr, SORT_STRING);
-        $tmpStr = implode($tmpArr);
-        $tmpStr = sha1($tmpStr);
+        $tmpStr = implode( $tmpArr );
+        $tmpStr = sha1( $tmpStr );
 
-        if ($tmpStr == $signature) {
+        if( $tmpStr == $signature ){
             return true;
-        } else {
+        }else{
             return false;
         }
     }

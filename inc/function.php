@@ -4,31 +4,6 @@ include("mysql.php");
 //include("bind.php");
 
 
-/***************************************
- *
- * 查天气
- * 来源：百度车联网
- * 地址：http://developer.baidu.com/map/carapi-7.htm
- ******************************************/
-function weather($fromUsername)
-{
-    $json = file_get_contents("http://api.map.baidu.com/telematics/v3/weather?location=%E4%B8%9C%E9%98%B3&output=json&ak=2c87d6d0443ab161753291258ac8ab7a");
-    $data = json_decode($json, true);
-    $contentStr = "【横店天气预报】：\n\n";
-    $contentStr = $contentStr . $data['results'][0]['weather_data'][0]['date'] . "\n";
-    $contentStr = $contentStr . "天气情况：" . $data['results'][0]['weather_data'][0]['weather'] . "\n";
-    $contentStr = $contentStr . "气温：" . $data['results'][0]['weather_data'][0]['temperature'] . "\n\n";
-    $contentStr = $contentStr . "明天：" . $data['results'][0]['weather_data'][1]['date'] . "\n";
-    $contentStr = $contentStr . "天气情况：" . $data['results'][0]['weather_data'][1]['weather'] . "\n";
-    $contentStr = $contentStr . "气温：" . $data['results'][0]['weather_data'][1]['temperature'] . "\n\n";
-    $contentStr = $contentStr . "后天：" . $data['results'][0]['weather_data'][2]['date'] . "\n";
-    $contentStr = $contentStr . "天气情况：" . $data['results'][0]['weather_data'][2]['weather'] . "\n";
-    $contentStr = $contentStr . "气温：" . $data['results'][0]['weather_data'][2]['temperature'] . "\n";
-
-    responseV_Text($fromUsername, $contentStr);
-}
-
-
 /*
  * 检查关键字中是否包含可回复字符
  * @param    string       $text        客人输入关键字
@@ -188,51 +163,74 @@ function return_eventkey_info($eventkey)
     }
 }
 
-/**
- * 查询活动信息
- * @access  public
- * @param   string $classid 活动编号
- * @param   string $type 信息类型
- * @return  string       $str             活动具体信息
+
+/*
+ *根据图片是上传还是网络图片，输出正确图片路径
+ * @param    string       $picurl      读取图片地址
+ * @return   string               输出结果
  */
-function Activity_Name($classid, $type)
+function check_picurl($picurl)
+{
+    if (strstr($picurl, 'http') != '') {
+        return $picurl;
+    } else {
+        return "http://weix.hengdianworld.com" . $picurl;
+    }
+}
+
+/*
+ * 检查关键字是不是电话号码
+
+ * @param    string       $keyword     输入字符
+ * @param    string       $text        客人输入关键字
+ * @return   string       $flag        输出结果
+*/
+function check_word($keyword)
 {
     include "mysql.php";
-    $row = mysql_fetch_array(mysql_query("select * from WX_Activity_List where id='" . $classid . "'"));
-    //	return $row[{$type}];
-
+    //  $abc='12345790';//调试语句
+    //  if ($abc == '') {$abc='13829840';}
+    $flag = 0;
+    if (preg_match('|^\d{8}$|', $keyword)) {
+        $flag = 1;
+    } elseif (preg_match("/^13[0-9]{1}[0-9]{8}$|15[0-9]{1}[0-9]{8}$|18[0-9]{1}[0-9]{8}$/", $keyword)) {
+        $flag = 2;
+    }
+    return $flag;
 }
 
 
-/**
- * 返回探班游报名情况
- * @access  public
- * @param   string $classid 活动编号
- * @return  string       $str             报名情况
+/*******
+ * @param $eventkey
+ * @return $flag
+ * 确认订单的是否被固定数整除
  */
-function Response_Sign($fromUsername, $toUsername, $classid)
+function check_order_number($eventkey)
 {
-    /*
-	$ContentStr=
-	$result = mysql_query("select * from WX_Activity_tb where id='".$classid."' order by id asc");
-	while($row = mysql_fetch_array($result))
-	{
-//		$ContentStr=
-	 }
-  
-  if ($hotelcount<>0)
-    {
-    	for ($j=0; $j<$hotelcount; $j++)
-        {
-          $i=$i+1;
-          $str=$str."\n订单".$i;
-          $str=$str."\n订单号:".$data['hotelorder'][$j]['sellid'];
-          $str=$str."\n预达日期:".$data['hotelorder'][$j]['date2'];
-          $str=$str."\n预订酒店:".$data['hotelorder'][$j]['hotel'];
-          $str=$str."\n数量:".$data['hotelorder'][$j]['numbers'];
-          $str=$str."\n天数:".$data['hotelorder'][$j]['days'];
-          $str=$str."\n订单状态:".$data['hotelorder'][$j]['flag']."\n";
+    if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
+        include "mysql.php";
+        $result = mysql_query("SELECT * from wx_order_send  order by id desc LIMIT 0,1", $link);
+        $row = mysql_fetch_array($result);
+        @$orderid = $row['ID'];
+
+        if ($orderid % 1 == "0") {
+            return true;
+        } else {
+            return false;
         }
+    } else {
+        return true;
     }
-    */
+
+}
+
+/***************************************
+ *
+ * 查询二维码的uid
+ ******************************************/
+function query_qr_uid($eventkey)
+{
+    include "mysql.php";
+    $row = mysql_fetch_array(mysql_query("SELECT * from wx_qrscene_info where Qrscene_id='" . $eventkey . "'", $link));
+    return $row['uid'];
 }

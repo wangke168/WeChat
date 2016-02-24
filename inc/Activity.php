@@ -391,10 +391,8 @@ function Query_ggl($fromUsername)
             $content="";
             $content[] = array("Title" => "" . $Title . "", "Description" => "" . $Description. "", "Url" => "" . $Url . "", "PicUrl" => "" . $PicUrl . "");
 
-            $result_xjson = item_news($fromUsername, $content);
-            $ACCESS_TOKEN = get_access_token();
-            $url_post = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" . $ACCESS_TOKEN;
-            vpost($url_post, $result_xjson);
+            $responseMsg=new responseMsg();
+            $responseMsg->postMsg_News($fromUsername, $content);
         }
     }
 }
