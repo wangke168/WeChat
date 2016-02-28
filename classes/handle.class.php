@@ -9,8 +9,8 @@
 class handle
 {
     /*
-       * 正常文字回复
-       */
+    *用户发送文字反馈
+    */
     public function handleText($postObj)
     {
         $fromUsername = $postObj->FromUserName;
@@ -58,20 +58,8 @@ class handle
                 }
 
                 $responseMsg->request_subscribe($fromUsername, $toUsername, $eventkey);
-                //      responseV_News($fromUsername, $eventkey, "1");
 
                 insert_user_info($fromUsername, $eventkey, 'subscribe');
-                /*
-                            if ($fromUsername=='o2e-YuBgnbLLgJGMQykhSg_V3VRI')
-                            {
-                                echo responseText($fromUsername,$toUsername, $eventkey);
-                            }
-                            else{
-                                responseV_News($fromUsername, $eventkey, "1");
-                            }
-                */
-//      makeNews($fromUsername,$toUsername,"关注");
-                //    request_subscribe($fromUsername,$toUsername);
 
                 break;
             case "SCAN":
@@ -80,10 +68,7 @@ class handle
                     $eventkey = substr($eventkey, 8);
                 }
                 $responseMsg->responseV_News($fromUsername, $eventkey, "1");
-                //   request_subscribe($fromUsername,$toUsername,$eventkey);
                 insert_user_info($fromUsername, $eventkey, "SCAN");
-
-
                 break;
             case "unsubscribe":
                 insert_unsubscribe_info($fromUsername);
@@ -92,55 +77,42 @@ class handle
                 switch ($object->EventKey) {
 
                     case "2":
-//          handleClick($fromUsername,"V1001");
                         $responseMsg->request_menu($fromUsername, $toUsername, "2");
                         break;
                     case "3":
-//          handleClick($fromUsername,"V1002");
                         $responseMsg->request_menu($fromUsername, $toUsername, "3");
                         break;
                     case "4":
-//          handleClick($fromUsername,"V1003");
                         $responseMsg->request_menu($fromUsername, $toUsername, "4");
                         break;
                     case "5":
-//          handleClick($fromUsername,"V1004");
                         $responseMsg->request_menu($fromUsername, $toUsername, "5");
                         break;
                     case "6":
-//          handleClick($fromUsername,"V1005");
                         $responseMsg->request_menu($fromUsername, $toUsername, "6");
                         break;
                     case "7":
-//          handleClick($fromUsername,"V2001");
                         $responseMsg->request_menu($fromUsername, $toUsername, "7");
                         break;
                     case "8":
-//         handleClick($fromUsername,"V2002");
                         $responseMsg->request_menu($fromUsername, $toUsername, "8");
                         break;
                     case "9":
-//          handleClick($fromUsername,"V2003");
                         $responseMsg->request_menu($fromUsername, $toUsername, "9");
                         break;
                     case "V2005":
-//          handleClick($fromUsername,"V2005");
                         $responseMsg->request_menu($fromUsername, $toUsername, "礼品激活");
                         break;
                     case "13":
-//          handleClick($fromUsername,"V3001");
-                        responseV_Text($fromUsername, "横店影视城官方客服电话" . "\n" . "400-9999141");
+                        $responseMsg->responseV_Text($fromUsername, "横店影视城官方客服电话" . "\n" . "400-9999141");
                         break;
                     case "14":
-//          handleClick($fromUsername,"V3002");
-                        request_menu($fromUsername, $toUsername, "14");
+                        $responseMsg->request_menu($fromUsername, $toUsername, "14");
                         break;
                     case "15":
-//          handleClick($fromUsername,"V3003");
                         $responseMsg->request_menu($fromUsername, $toUsername, "15");
                         break;
                     case "16":
-//          handleClick($fromUsername,"V3004");
                         $responseMsg->request_menu($fromUsername, $toUsername, "16");
                         break;
                     case "18":
@@ -164,9 +136,10 @@ class handle
     * @return   string               输出结果
     */
 
-    function handleVoice($postObj)
+    public function handleVoice($postObj)
     {
         $fromUsername = $postObj->FromUserName;
+        $responseMsg = new responseMsg();
 //    $toUsername = $postObj->ToUserName;
         /*
          $Recognition = $postObj->Recognition;
@@ -219,27 +192,27 @@ class handle
         //   else
         //   {
         $contentStr = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
-        responseV_Text($fromUsername, $contentStr);
+        $responseMsg->responseV_Text($fromUsername, $contentStr);
         //   }
 
     }
 
     //客人发送图片的保存回复
-    function handleImage($postObj)
+    public function handleImage($postObj)
     {
-        include "mysql.php";
         $fromUsername = $postObj->FromUserName;
-        $toUsername = $postObj->ToUserName;
+//        $toUsername = $postObj->ToUserName;
         $PicUrl = $postObj->PicUrl;
         $MediaId = $postObj->MediaId;
         $MsgId = $postObj->MsgId;
 
+        $responseMsg= new responseMsg();
+
         mysql_query("INSERT INTO WX_Image_Receive (WX_OpenID,PicUrl,MediaId,MsgId) VALUES ('" . $fromUsername . "','" . $PicUrl . "','" . $MediaId . "','" . $MsgId . "')") or die(mysql_error());
-        mysql_close($link);
+//        mysql_close($link);
 
-        $Contentstr = "您好，图片接收成功";
-
-        echo responseText($fromUsername, $toUsername, $Contentstr);
+        $contentStr = "您好，感谢您发送图片给小横横。";
+        $responseMsg->responseV_Text($fromUsername, $contentStr);
     }
 
 } 

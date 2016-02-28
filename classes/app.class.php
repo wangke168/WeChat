@@ -34,24 +34,23 @@ class wechatCallbackapi
 //        include("inc/response.php");
         @$postStr = $GLOBALS["HTTP_RAW_POST_DATA"];
 
+
         if (!empty($postStr)) {
 
-                        ignore_user_abort(true);
-                        ob_start();
-                        // do initial processing here
-                        echo 'success'; // send the response
-                        header('Connection: close');
-                        header('Content-Length: ' . ob_get_length());
-                        ob_end_flush();
-                        ob_flush();
-                        flush();
+            //先返回一个“success”
+            ignore_user_abort(true);
+            ob_start();
+            echo 'success'; // send the response
+            ob_end_flush();
+            ob_flush();
+            flush();
 
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
 
             $RX_TYPE = trim($postObj->MsgType);
 
             //检测客人的操作，文本，事件或其他
-            $handle=new handle();
+            $handle = new handle();
             switch ($RX_TYPE) {
                 case "text":
                     $handle->handleText($postObj);
@@ -109,12 +108,12 @@ class wechatCallbackapi
                 if ($temp_array[0] == '去横店穿越去横店飞') {
                     responseV_Text($fromUsername, "cg");
                 } else {
-                    $responseMsg=new responseMsg();
-                    $responseMsg->handleText_normal($fromUsername,$keyword);
+                    $responseMsg = new responseMsg();
+                    $responseMsg->handleText_normal($fromUsername, $keyword);
                 }
             } else {
-                $responseMsg=new responseMsg();
-                $responseMsg->handleText_normal($fromUsername,$keyword);
+                $responseMsg = new responseMsg();
+                $responseMsg->handleText_normal($fromUsername, $keyword);
 
             }
         }
@@ -129,12 +128,12 @@ class wechatCallbackapi
         $token = TOKEN;
         $tmpArr = array($token, $timestamp, $nonce);
         sort($tmpArr, SORT_STRING);
-        $tmpStr = implode( $tmpArr );
-        $tmpStr = sha1( $tmpStr );
+        $tmpStr = implode($tmpArr);
+        $tmpStr = sha1($tmpStr);
 
-        if( $tmpStr == $signature ){
+        if ($tmpStr == $signature) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

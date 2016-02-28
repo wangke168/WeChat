@@ -81,7 +81,7 @@ class responseMsg
     /*
      * 客服接口的json模版
      */
-    private  function item_news($fromUsername, $newsArray)
+    private function item_news($fromUsername, $newsArray)
     {
 
         $itemTpl = "{
@@ -150,7 +150,6 @@ class responseMsg
     }
 
 
-
     /***************************************
      *
      * 关键字回复
@@ -159,7 +158,7 @@ class responseMsg
     {
         include "mysql.php";
         $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
-
+        $keyword = check_in($keyword);
         //查询是否有符合的记录
         $itemsCount1 = mysql_query("SELECT id from wx_article where audit=1 and online='1'  and (eventkey='all' or eventkey='" . $eventkey . "') and (classid = '" . $keyword . "' or keyword like '%" . $keyword . "%') and startdate<=CURDATE() and enddate>=CURDATE() order by id desc LIMIT 0,1", $link);
         $row1 = mysql_fetch_array($itemsCount1);
@@ -368,6 +367,7 @@ class responseMsg
     private function Query_Market_Article($keyword, $type)
     {
         include("mysql.php");
+
         switch ($type) {
             case "1":
                 $row = mysql_fetch_array(mysql_query("SELECT * from wx_article where msgtype='news' and focus = 1  and audit=1 and online=1 and   eventkey='" . $keyword . "'  and startdate<=CURDATE() and enddate>=CURDATE()  order by priority asc,id desc  LIMIT 0,10", $link));
@@ -384,11 +384,10 @@ class responseMsg
     }
 
 
-
     public function postMsg_News($fromUsername, $content)
     {
 
-        $result_xjson = $this->item_news($fromUsername,$content);
+        $result_xjson = $this->item_news($fromUsername, $content);
         $ACCESS_TOKEN = get_access_token();
         $url_post = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" . $ACCESS_TOKEN;
         vpost($url_post, $result_xjson);
@@ -400,7 +399,7 @@ class responseMsg
      * 来源：百度车联网
      * 地址：http://developer.baidu.com/map/carapi-7.htm
      ******************************************/
-    public  function weather($fromUsername)
+    public function weather($fromUsername)
     {
         $json = file_get_contents("http://api.map.baidu.com/telematics/v3/weather?location=%E4%B8%9C%E9%98%B3&output=json&ak=2c87d6d0443ab161753291258ac8ab7a");
         $data = json_decode($json, true);

@@ -1,13 +1,20 @@
 <?php
 
+//include ("../classes/response.class.php");
+
 /*
 *  预订成功后从官网接受信息，反馈给客人微信
 */
 include("mysql.php");
 include("function.php");
-include("response.php");
+//include("response.php");
 include("query.php");
 include("bind.php");
+
+
+
+
+
 
 
 $sellid = $_GET['sellid'];
@@ -46,7 +53,7 @@ function check_order($sellid)
 
 function Repost_order($sellid, $fromUsername)
 {
-    $url = "http://e.hengdianworld.com/searchorder_json.aspx?sellid=" . $sellid;
+//    $url = "http://e.hengdianworld.com/searchorder_json.aspx?sellid=" . $sellid;
     $json = file_get_contents("http://e.hengdianworld.com/searchorder_json.aspx?sellid=" . $sellid);
     $data = json_decode($json, true);
 

@@ -11,23 +11,18 @@ include("mysql.php");
 */
 function check_in($text)
 {
-    include("mysql.php");
+    $db=new DB();
     $flag = "不包含";
-    $result = mysql_query("select * from WX_Request_Keyword order by id asc");
-    while ($row = mysql_fetch_array($result)) {
+    $row = $db->query("select keyword from WX_Request_Keyword order by id asc",PDO::FETCH_NUM);
 
-        //      	$arr="报名,探班,交通,公交,出租,门票,套餐,剧组,预订,节目,测试,景区,景点,玩,秦王宫,明清宫苑,清明上河图,广州街香港街,梦幻谷,电影";
-        //		$keys = explode(',',$arr);
-        //		$result = '不包含';
-        //		if($keys){
-        //			foreach($keys as $key){
-        if (strstr($text, $row['Keyword']) != '') {
-            $flag = $row['Keyword'];
+    foreach ($row as $result)
+    {
+        if (strstr($text, $result['keyword']) != '') {
+            $flag = $result['keyword'];
             //              $flag = "bbb";
             break;
         }
     }
-
     return $flag;
 }
 
