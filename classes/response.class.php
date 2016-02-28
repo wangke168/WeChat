@@ -8,15 +8,23 @@
  */
 class responseMsg
 {
+    /*********
+     * 利用客服接口返回图文消息
+     *
+     * string $type  图文返回类型  1:关注；2：关键字；
+     *string $keyword 关键字，如果是关注回复，则为空
+     *
+     */
     public function responseV_News($fromUsername, $keyword, $type)
     {
-        include "mysql.php";
+        $db=new DB();
         switch ($type) {
             case "1":
                 if (!$keyword || $keyword == "") {
                     $eventkey = "all";
                 } else {
                     $eventkey = $keyword;
+                    $uid=query_qr_uid($eventkey);
                 }
                 break;
             case "2":
@@ -25,31 +33,25 @@ class responseMsg
                 break;
         }
 
-        if (!$uid) {
-            $uid = "";
-        }
-
         switch ($type) {
             case "1":
                 /* 根据用户的openid所属eventkey下有没有关注显示的文章 */
                 if ($this->Query_Market_Article($eventkey, 1)) {
-                    $result = mysql_query("SELECT * from wx_article where msgtype='news' and focus = 1  and audit=1 and online=1 and   eventkey='" . $eventkey . "'  and startdate<=CURDATE() and enddate>=CURDATE()  order by priority asc,id desc  LIMIT 0,8", $link);
+                    $row= $db->query("SELECT * from wx_article where msgtype=:msgtype and focus = :focus  and audit=:audit and online=:online and   eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,8",array("msgtype"=>"news","focus"=>"1","audit"=>"1","online"=>"1","eventkey"=>"$eventkey","startdate"=>date('Y-m-d'),"enddate"=>date('Y-m-d')));
                 } else {
-                    $result = mysql_query("SELECT * from wx_article where msgtype='news' and focus = 1  and audit=1 and online=1 and  eventkey='all'  and startdate<=CURDATE() and enddate>=CURDATE()  order by priority asc,id desc  LIMIT 0,8", $link);
+                    $row= $db->query("SELECT * from wx_article where msgtype=:msgtype and focus = :focus  and audit=:audit and online=:online and   eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,8",array("msgtype"=>"news","focus"=>"1","audit"=>"1","online"=>"1","eventkey"=>"all","startdate"=>date('Y-m-d'),"enddate"=>date('Y-m-d')));
                 }
                 break;
             case "2":
-                $result = mysql_query("SELECT * from wx_article where msgtype='news' and (classid = '" . $keyword . "' or keyword like '%" . $keyword . "%') and audit=1 and online=1 and  (eventkey='all' or eventkey='" . $eventkey . "')  and startdate<=CURDATE() and enddate>=CURDATE()   order by priority asc,id desc  LIMIT 0,8", $link);
+                $row=$db->query("SELECT * from wx_article where msgtype=:msgtype and keyword like :keyword and audit=:audit and online=:online and  (eventkey=:allkey or eventkey=:eventkey)  and startdate<=:startdate and enddate>=:enddate   order by priority asc,id desc  LIMIT 0,8",array("msgtype"=>"news","keyword"=>"%$keyword%","audit"=>"1","online"=>"1","allkey"=>"all","eventkey"=>$eventkey,"startdate"=>date('Y-m-d'),"enddate"=>date('Y-m-d')));
                 break;
         }
-        //   $result = mysql_query("SELECT * from wx_article where msgtype='news' and (classid = '" . $keyword . "' or keyword like '%" . $keyword . "%') and audit=1 and online=1 and  (eventkey='all' or eventkey='".$eventkey."')  and startdate<=CURDATE() and enddate>=CURDATE()   order by priority asc,id desc  LIMIT 0,8",$link);
         $i = 0;
         $content = array();
-        while ($row = mysql_fetch_array($result)) {
-
-            $url = $row['url'];
-
-            /*如果只直接跳转链接页面时，判断是否已经带参数*/
+        foreach($row as $result)
+        {
+            $url=$result['url'];
+            //如果只直接跳转链接页面时，判断是否已经带参数
             if ($url != '') {
                 if (strstr($url, '?') != '') {
                     $url = $url . "&wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
@@ -57,11 +59,11 @@ class responseMsg
                     $url = $url . "?wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
                 }
             } else {
-                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $row['id'] . "&wxnumber=" . $fromUsername;
+                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $fromUsername;
             }
 
-            @$PicUrl = check_picurl($row['picurl']);
-            @$PicUrl_Small = $row['picUrl_Small'];
+            @$PicUrl = check_picurl($result['picurl']);
+            @$PicUrl_Small = $result['picUrl_Small'];
             if ($i != 0) {
                 if ($PicUrl_Small != '') {
                     $PicUrl = check_picurl($PicUrl_Small);
@@ -69,13 +71,11 @@ class responseMsg
             }
             $i = $i + 1;
 
-            $content[] = array("Title" => "" . $row['title'] . "", "Description" => "" . $row['title'] . "", "Url" => "" . $url . "", "PicUrl" => "" . $PicUrl . "");
+            $content[] = array("Title" => "" . $result['title'] . "", "Description" => "" . $result['title'] . "", "Url" => "" . $url . "", "PicUrl" => "" . $PicUrl . "");
         }
 
-        $result_xjson = $this->item_news($fromUsername, $content);
-        $ACCESS_TOKEN = get_access_token();
-        $url_post = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=" . $ACCESS_TOKEN;
-        vpost($url_post, $result_xjson);
+        $this->postMsg_News($fromUsername, $content);
+
     }
 
     /*
@@ -156,20 +156,17 @@ class responseMsg
      ******************************************/
     public function request_keyword($fromUsername, $keyword)
     {
-        include "mysql.php";
+        $db = new DB();
         $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
         $keyword = check_in($keyword);
         //查询是否有符合的记录
-        $itemsCount1 = mysql_query("SELECT id from wx_article where audit=1 and online='1'  and (eventkey='all' or eventkey='" . $eventkey . "') and (classid = '" . $keyword . "' or keyword like '%" . $keyword . "%') and startdate<=CURDATE() and enddate>=CURDATE() order by id desc LIMIT 0,1", $link);
-        $row1 = mysql_fetch_array($itemsCount1);
-        if ($row1) {
+        $row=$db->query("SELECT id from wx_article where audit=:audit and online=:online  and (eventkey=:allkey or eventkey=:eventkey) and  keyword like :keyword and startdate<=:startdate and enddate>=:enddate",array("audit"=>"1","online"=>"1","allkey"=>"all","eventkey"=>$eventkey,"keyword"=>"$keyword%","startdate"=>date('Y-m-d'),"enddate"=>date('Y-m-d')));
+        if ($row) {
             $this->responseV_News($fromUsername, $keyword, "2");
-
         } else {
             $contentStr = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
             $this->responseV_Text($fromUsername, $contentStr);
         }
-
     }
 
 
@@ -186,7 +183,6 @@ class responseMsg
         } else {
             $uid = "";
         }
-
 
 //	查询优惠码，在套餐预订时嵌入
         @$coupon_code = '';
