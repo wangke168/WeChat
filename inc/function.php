@@ -1,8 +1,4 @@
 <?php
-include("mysql.php");
-//include("Activity.php");
-//include("bind.php");
-
 
 /*
  * 检查关键字中是否包含可回复字符
@@ -11,12 +7,11 @@ include("mysql.php");
 */
 function check_in($text)
 {
-    $db=new DB();
+    $db = new DB();
     $flag = "不包含";
-    $row = $db->query("select keyword from WX_Request_Keyword order by id asc",PDO::FETCH_NUM);
+    $row = $db->query("select keyword from WX_Request_Keyword order by id asc", PDO::FETCH_NUM);
 
-    foreach ($row as $result)
-    {
+    foreach ($row as $result) {
         if (strstr($text, $result['keyword']) != '') {
             $flag = $result['keyword'];
             //              $flag = "bbb";
@@ -31,20 +26,20 @@ function check_in($text)
  * @access  public
  * @param   string $fromUsername 客人微信号
  * @return  int          $str                  群组
+ *
+ *
+ * function CheckGroup($fromUsername)
+ * {
+ * include("mysql.php");
+ * $result = mysql_query("select * from WX_User_Group where WX_OpenID='" . $fromUsername . "'") or die(mysql_error());
+ * $row = mysql_fetch_array($result);
+ * if (!$row) {
+ * return "0";
+ * } else {
+ * return $row['Group'];
+ * }
+ * }
  */
-
-function CheckGroup($fromUsername)
-{
-    include("mysql.php");
-    $result = mysql_query("select * from WX_User_Group where WX_OpenID='" . $fromUsername . "'") or die(mysql_error());
-    $row = mysql_fetch_array($result);
-    if (!$row) {
-        return "0";
-    } else {
-        return $row['Group'];
-    }
-}
-
 
 /*
 * 获取access_token
@@ -52,25 +47,19 @@ function CheckGroup($fromUsername)
 */
 function get_access_token()
 {
-//    require_once ('Memcache.php');
-//    $mem = new hdMemcache();
-
     $mem = new Memcache;
     $mem->connect("127.0.0.1", 11211);
     @$mark_time = $mem->get("mark_time");
-    $access_token = $mem->get("access_token1");
+    $access_token = $mem->get("access_token");
     if (!$mark_time || (time() - $mark_time > 3600) || !$access_token) {
 
         $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx3e632d57ac5dcc68&secret=5bc0ddd4d88d904c9b24131fa9227f81";
         $json = http_request_json($url);//这个地方不能用file_get_contents
         $data = json_decode($json, true);
         if ($data['access_token']) {
-            //将access_token写入缓存
-            //            require_once 'BaeMemcache.class.php';
-            //         	$mem = new BaeMemcache();
-            $mem->set("access_token1", $data['access_token'], 0, 7200);    //设置cache，为下一步提供依据
+            $mem->set("access_token", $data['access_token'], 0, 7200);    //设置cache，为下一步提供依据
             $mem->set("mark_time", time(), 0, 7200);
-            $access_token = $mem->get("access_token1");
+            $access_token = $mem->get("access_token");
             return $access_token;
         } else {
             return "获取access_token错误";
@@ -128,12 +117,9 @@ function vpost($url, $data)
 */
 function return_user_info($fromUsername, $type)
 {
-    include "mysql.php";
-    $result = mysql_query("select * from WX_User_Info where wx_openid='" . $fromUsername . "' order by id desc LIMIT 0,1");
-    $row = mysql_fetch_array($result);
+    $db = new DB();
+    $row = $db->row("select * from WX_User_Info where wx_openid=:fromUsername order by id desc LIMIT 0,1", array("fromUsername" => $fromUsername));
     return $row[$type];
-    //    responseV_Text($fromUsername,$row[$type]);
-    //  responseV_Text($fromUsername,"fdsgdfs");
 }
 
 
@@ -148,9 +134,8 @@ function return_user_info($fromUsername, $type)
  */
 function return_eventkey_info($eventkey)
 {
-    include "mysql.php";
-    $result = mysql_query("select * from WX_qrscene_Info where Qrscene_id='" . $eventkey . "' order by id desc LIMIT 0,1");
-    $row = mysql_fetch_array($result);
+    $db = new DB();
+    $row = $db->row("select * from WX_qrscene_Info where Qrscene_id=:Qrscene_id order by id desc LIMIT 0,1", array("Qrscene_id" => $eventkey));
     if (!$row['Root_ID']) {
         return $eventkey;
     } else {
@@ -182,9 +167,6 @@ function check_picurl($picurl)
 */
 function check_word($keyword)
 {
-    include "mysql.php";
-    //  $abc='12345790';//调试语句
-    //  if ($abc == '') {$abc='13829840';}
     $flag = 0;
     if (preg_match('|^\d{8}$|', $keyword)) {
         $flag = 1;
@@ -203,11 +185,9 @@ function check_word($keyword)
 function check_order_number($eventkey)
 {
     if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
-        include "mysql.php";
-        $result = mysql_query("SELECT * from wx_order_send  order by id desc LIMIT 0,1", $link);
-        $row = mysql_fetch_array($result);
+        $db=new DB();
+        $row=$db->row("SELECT * from wx_order_send  order by id desc LIMIT 0,1");
         @$orderid = $row['ID'];
-
         if ($orderid % 1 == "0") {
             return true;
         } else {
@@ -225,7 +205,7 @@ function check_order_number($eventkey)
  ******************************************/
 function query_qr_uid($eventkey)
 {
-    include "mysql.php";
-    $row = mysql_fetch_array(mysql_query("SELECT * from wx_qrscene_info where Qrscene_id='" . $eventkey . "'", $link));
+    $db=new DB();
+    $row=$db->row("SELECT * from wx_qrscene_info where Qrscene_id=:Qrscene_id",array("Qrscene_id"=>$eventkey));
     return $row['uid'];
 }

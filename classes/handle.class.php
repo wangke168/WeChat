@@ -77,46 +77,43 @@ class handle
                 switch ($object->EventKey) {
 
                     case "2":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "2");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"2");
                         break;
                     case "3":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "3");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"3");
                         break;
                     case "4":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "4");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"4");
                         break;
                     case "5":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "5");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"5");
                         break;
                     case "6":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "6");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"6");
                         break;
                     case "7":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "7");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"7");
                         break;
                     case "8":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "8");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"8");
                         break;
                     case "9":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "9");
-                        break;
-                    case "V2005":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "礼品激活");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"9");
                         break;
                     case "13":
                         $responseMsg->responseV_Text($fromUsername, "横店影视城官方客服电话" . "\n" . "400-9999141");
                         break;
                     case "14":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "14");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"14");
                         break;
                     case "15":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "15");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"15");
                         break;
                     case "16":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "16");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"16");
                         break;
                     case "18":
-                        $responseMsg->request_menu($fromUsername, $toUsername, "18");
+                        $responseMsg->request_menu($fromUsername,$toUsername,"18");
                         break;
                     default:
                         $contentStr[] = array("Title" => "默认菜单回复", "Description" => "欢迎关注横店影城城", "PicUrl" => "http://discuz.comli.com/weixin/weather/icon/cartoon.jpg", "Url" => "weixin://addfriend/beancube");

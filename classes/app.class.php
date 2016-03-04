@@ -53,7 +53,9 @@ class wechatCallbackapi
             $handle = new handle();
             switch ($RX_TYPE) {
                 case "text":
-                    $handle->handleText($postObj);
+                    $active=new active();
+                    $active->text_taizhou($postObj);
+//                    $handle->handleText($postObj);
                     break;
                 case "event":
                     $handle->handleEvent($postObj);

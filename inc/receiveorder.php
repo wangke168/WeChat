@@ -1,18 +1,10 @@
 <?php
-
-//include ("../classes/response.class.php");
-
+require("../classes/DB.class.php");
+require("../classes/response.class.php");
+require("function.php");
 /*
 *  预订成功后从官网接受信息，反馈给客人微信
 */
-include("mysql.php");
-include("function.php");
-//include("response.php");
-include("query.php");
-include("bind.php");
-
-
-
 
 
 
@@ -22,11 +14,12 @@ $sellid = $_GET['sellid'];
 //	$fromUsername = "o2e-YuBgnbLLgJGMQykhSg_V3VRI";
 $fromUsername = $_GET['openid'];
 
+$db = new DB();
 //查询是否已经发送过信息，避免二次发送
 
 if (check_order($sellid)) {
     $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
-    mysql_query("INSERT INTO WX_Order_Send (WX_OpenID,SellID,eventkey) VALUES ('" . $fromUsername . "','" . $sellid . "','" . $eventkey . "')") or die(mysql_error());
+    $row = $db->query("INSERT INTO WX_Order_Send (WX_OpenID,SellID,eventkey) VALUES (:fromUsername,:sellid,:eventkey)", array("fromUsername" => $fromUsername,"sellid" => $sellid,"eventkey" => $eventkey));
     if (!check_order($sellid)) {
         $ACCESS_TOKEN = get_access_token();
         $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" . $ACCESS_TOKEN;
@@ -34,16 +27,13 @@ if (check_order($sellid)) {
     }
 }
 
-mysql_close($link);
 
 function check_order($sellid)
 {
-    include("mysql.php");
-    $url = "SELECT count(*) from WX_Order_Send where SellID = '" . $sellid . "'";
-    $itemsCount = mysql_query($url, $link);
-    $row1 = mysql_fetch_array($itemsCount);
-    $itemsCount = $row1['count(*)'];
-    if ($itemsCount == 0) {
+    $db = new DB();
+    $row = $db->query("SELECT count(*) as allcount from WX_Order_Send where SellID = :SellID", array("SellID" => $sellid));
+
+    if ($row[0]["allcount"] == 0) {
         $flag = true;
     } else {
         $flag = false;
@@ -226,6 +216,3 @@ function Repost_order($sellid, $fromUsername)
     return $xjson;
 
 }
-
-
-?>
