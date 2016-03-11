@@ -14,7 +14,7 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 mysql.php
-settings.ini.php
+
 
 # Windows shortcuts
 *.lnk

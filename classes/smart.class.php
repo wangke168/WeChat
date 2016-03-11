@@ -30,7 +30,7 @@ class smart
                 if ($temptime < 30 && $temptime>0) {
                     $row1 = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days and UNIX_TIMESTAMP(endtime)>=:endtime order by id desc", array("eventkey" => $result['eventkey'], "days" => date('Y-m-d'),"endtime"=>strtotime($prevtime)));
                     foreach ($row1 as $ccc) {
-                        $response->responseV_Text($ccc["wx_openID"], "您好，" .$result["show_id"]."景区". $result["show_name"]."的演出时间是".$bbb."还没到剧场的话要抓紧了哦。\n如果您不知道剧场位置，<a href='".$result["location_url"]."'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
+                        $response->responseV_Text($ccc["wx_openID"], "您好，" .$result["zone_id"]."景区". $result["show_name"]."的演出时间是".$bbb."还没到剧场的话要抓紧了哦。\n如果您不知道剧场位置，<a href='".$result["location_url"]."'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
                         $response->responseV_News($ccc['wx_openID'], $result["show_name"], "2");
                     }
                 }

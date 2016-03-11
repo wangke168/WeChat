@@ -7,6 +7,7 @@
  * @version      0.2ab
  *
  */
+
 require("Log.class.php");
 class DB
 {
