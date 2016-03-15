@@ -26,10 +26,10 @@ class wechatCallbackapi
 
     public function responseMsg()
     {
-        include("inc/query.php");
+//        include("inc/query.php");
         include("inc/function.php");
-        include("inc/Activity.php");
-        include("inc/active.php");
+//        include("inc/Activity.php");
+//        include("inc/active.php");
         include("inc/event.php");
 //        include("inc/response.php");
         @$postStr = $GLOBALS["HTTP_RAW_POST_DATA"];

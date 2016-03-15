@@ -1,6 +1,6 @@
 ;<?php return; ?>
 [SQL]
-host = localhost
+host = lochost
 user = weixin
 password = Wk*471000
 dbname = weixin

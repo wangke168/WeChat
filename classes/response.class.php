@@ -92,15 +92,22 @@ class responseMsg
 
             $content[] = array("Title" => "" . $result['title'] . "", "Description" => "" . $result['description'] . "", "Url" => "" . $url . "", "PicUrl" => "" . $PicUrl . "");
         }
-
+        /*关键字有图文时显示图文*/
         $this->postMsg_News($fromUsername, $content);
 
         /*如果是扫描景区二维码，则提示导航功能*/
-        if($type=="1") {
-            if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
-                $this->responseV_Text($fromUsername, "如果您想寻找周边的洗手间，您可以输入“厕所”或“卫生间”或“洗手间”。小横横会带你去哦。");
-            }
+        switch ($type) {
+            case "1":
+                if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
+                    $this->responseV_Text($fromUsername, "如果您想寻找周边的洗手间，您可以输入“厕所”或“卫生间”或“洗手间”。小横横会带你去哦。");
+                }
+                break;
         }
+        /* if($type=="1") {
+             if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
+                 $this->responseV_Text($fromUsername, "如果您想寻找周边的洗手间，您可以输入“厕所”或“卫生间”或“洗手间”。小横横会带你去哦。");
+             }
+         }*/
     }
 
 
@@ -127,13 +134,30 @@ class responseMsg
             //查询是否有符合的记录
             $row = $db->query("SELECT id from wx_article where audit=:audit and online=:online  and (eventkey=:allkey or eventkey=:eventkey) and  keyword like :keyword and startdate<=:startdate and enddate>=:enddate", array("audit" => "1", "online" => "1", "allkey" => "all", "eventkey" => $eventkey, "keyword" => "%$keyword%", "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
             if ($row) {
-                $this->responseV_News($fromUsername, $keyword, "2");
+                $row_txt = $db->query("SELECT id from wx_article where msgtype=:msgtype and audit=:audit and online=:online  and (eventkey=:allkey or eventkey=:eventkey) and  keyword like :keyword and startdate<=:startdate and enddate>=:enddate", array("msgtype" => "txt", "audit" => "1", "online" => "1", "allkey" => "all", "eventkey" => $eventkey, "keyword" => "%$keyword%", "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
+                if ($row_txt) {
+                    $this->request_keyword_txt($fromUsername, $keyword);
+                } else {
+                    $this->responseV_News($fromUsername, $keyword, "2");
+                }
             } else {
                 $contentStr = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
                 $this->responseV_Text($fromUsername, $contentStr);
             }
         }
+    }
 
+    /*
+    * 回复关键字的文本回复
+    *
+    */
+    private function request_keyword_txt($fromUsername, $keyword)
+    {
+        $db = new DB();
+        $row_txt = $db->query("SELECT * from wx_article where msgtype=:msgtype and audit=:audit and online=:online  and (eventkey=:allkey or eventkey=:eventkey) and  keyword like :keyword and startdate<=:startdate and enddate>=:enddate", array("msgtype" => "txt", "audit" => "1", "online" => "1", "allkey" => "all", "eventkey" => $eventkey, "keyword" => "%$keyword%", "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
+        foreach ($row_txt as $result) {
+            $this->responseV_Text($fromUsername, $result["content"]);
+        }
     }
 
     /*
@@ -155,13 +179,10 @@ class responseMsg
         $CreateTime = time();
         $FuncFlag = 1;
 
-        if($menu=="8")
-        {
-            if (!$eventkey)
-            {
-                $rowcheck=$db->query("SELECT * from wx_user_info where wx_openID=:wx_openID order by id desc  LIMIT 0,1",array("wx_openID"=>$fromUsername));
-                if ( strtotime($rowcheck[0]['endtime']) > strtotime("2016-03-10 21:07:00"))
-                {
+        if ($menu == "8") {
+            if (!$eventkey) {
+                $rowcheck = $db->query("SELECT * from wx_user_info where wx_openID=:wx_openID order by id desc  LIMIT 0,1", array("wx_openID" => $fromUsername));
+                if (strtotime($rowcheck[0]['endtime']) > strtotime("2016-03-10 21:07:00")) {
                     $uid = "627A7778313233";
                 }
 //                $row = mysql_fetch_array(mysql_query("SELECT * from wx_user_info where wx_openID='" . $fromUsername . "' order by id desc  LIMIT 0,1", $link));
@@ -227,16 +248,16 @@ class responseMsg
         $Content = '';
         $db = new DB();
 
-/*        //黄金周专属
-        if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
-            $row = $db->query("SELECT * from wx_article where id='170'");
-        } else {
-            if ($this->Query_Market_Article($eventkey, 1)) {
-                $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => $eventkey, "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
-            } else {
-                $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => "all", "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
-            }
-        }*/
+        /*        //黄金周专属
+                if (($eventkey == "87") || ($eventkey == "88") || ($eventkey == "90") || ($eventkey == "91")) {
+                    $row = $db->query("SELECT * from wx_article where id='170'");
+                } else {
+                    if ($this->Query_Market_Article($eventkey, 1)) {
+                        $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => $eventkey, "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
+                    } else {
+                        $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => "all", "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
+                    }
+                }*/
 
         if ($this->Query_Market_Article($eventkey, 1)) {
             $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => $eventkey, "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
