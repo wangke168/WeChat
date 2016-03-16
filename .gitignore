@@ -2,6 +2,9 @@
 Thumbs.db
 ehthumbs.db
 
+#Folder
+.idea/*
+
 # Folder config file
 Desktop.ini
 
@@ -14,6 +17,7 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 mysql.php
+
 
 
 # Windows shortcuts
