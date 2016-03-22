@@ -1,10 +1,12 @@
 <?php
 
-include("classes/app.class.php");
-include("classes/response.class.php");
-include("classes/handle.class.php");
-include("classes/Db.class.php");
-include("classes/active.class.php");
+require_once("classes/app.class.php");
+require_once("classes/response.class.php");
+require_once("classes/handle.class.php");
+require_once("classes/Db.class.php");
+require_once("classes/active.class.php");
+require_once("classes/tour.class.php");
+
 
 define("TOKEN", "hdtravel");
 define("AppID", "wx3e632d57ac5dcc68");

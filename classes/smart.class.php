@@ -20,7 +20,7 @@ class smart
     {
         $db = new DB();
         $response = new responseMsg();
-        $row = $db->query("Select * from wx_location_list where id <4");
+        $row = $db->query("Select * from wx_location_list where id <5");
         foreach ($row as $result) {
             $aaa = explode(',', $result["show_time"]);
             $prevtime = "";

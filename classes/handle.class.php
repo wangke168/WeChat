@@ -29,6 +29,10 @@ class handle
             case "a":
                 $responseMsg->responseV_Text($fromUsername, return_user_info($fromUsername, 'eventkey'));
                 break;
+            case "hx":
+                $tour=new tour();
+                $responseMsg->responseV_Text($fromUsername,$tour->track_info($fromUsername,"1"));
+                break;
             case "刮刮乐":
                 Query_ggl($fromUsername);
                 break;
@@ -205,10 +209,12 @@ class handle
         $MsgId = $postObj->MsgId;
 
         $responseMsg = new responseMsg();
+        $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
 
         $db = new DB();
 
-        $db->query("INSERT INTO WX_Image_Receive (WX_OpenID,PicUrl,MediaId,MsgId) VALUES (:fromUsername,:PicUrl,:MediaId,:MsgId)", array("fromUsername" => $fromUsername, "PicUrl" => $PicUrl, "MediaId" => $MediaId, "MsgId" => $MsgId));
+        $db->query("INSERT INTO WX_Image_Receive (WX_OpenID,PicUrl,MediaId,MsgId,eventkey) VALUES (:fromUsername,:PicUrl,:MediaId,:MsgId,:eventkey)",
+            array("fromUsername" => $fromUsername, "PicUrl" => $PicUrl, "MediaId" => $MediaId, "MsgId" => $MsgId,"eventkey"=>$eventkey));
 
 
 //        mysql_query("INSERT INTO WX_Image_Receive (WX_OpenID,PicUrl,MediaId,MsgId) VALUES ('" . $fromUsername . "','" . $PicUrl . "','" . $MediaId . "','" . $MsgId . "')") or die(mysql_error());

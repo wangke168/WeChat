@@ -7,18 +7,23 @@
  *
  *
  */
-require("../classes/DB.class.php");
-
-require("function.php");
+require_once("../classes/DB.class.php");
+require_once("function.php");
 /*
 *  预订成功后从官网接受信息，反馈给客人微信
 */
 
 
 $sellid = $_GET['sellid'];
+
+//$encrypt=new encrypt();
 //	$sellid="V1409140222";
 //	$fromUsername = "o2e-YuBgnbLLgJGMQykhSg_V3VRI";
 $fromUsername = $_GET['openid'];
+
+//$fromUsername=$encrypt->passport_decrypt($fromUsername);
+$fromUsername=authcode($fromUsername,'DECODE',0);
+
 
 $db = new DB();
 //查询是否已经发送过信息，避免二次发送

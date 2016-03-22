@@ -36,6 +36,7 @@ class responseMsg
      */
     public function responseV_News($fromUsername, $keyword, $type)
     {
+        $wxnumber = authcode($fromUsername,'ENCODE',0);
         $db = new DB();
         switch ($type) {
             case "1":
@@ -73,12 +74,12 @@ class responseMsg
             /*如果只直接跳转链接页面时，判断是否已经带参数*/
             if ($url != '') {
                 if (strstr($url, '?') != '') {
-                    $url = $url . "&wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "&wxnumber=" . $wxnumber . "&uid=" . $uid . "&wpay=1";
                 } else {
-                    $url = $url . "?wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "?wxnumber=" . $wxnumber . "&uid=" . $uid . "&wpay=1";
                 }
             } else {
-                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $fromUsername;
+                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $wxnumber;
             }
 
             @$PicUrl = check_picurl($result['picurl']);
@@ -170,6 +171,7 @@ class responseMsg
      */
     public function request_menu($fromUsername, $toUsername, $menu)
     {
+        $wxnumber = authcode($fromUsername,'ENCODE',0);
         $db = new DB();
         $uid = "";
         $eventkey = return_eventkey_info(return_user_info($fromUsername, "eventkey"));  //获取客人所属市场
@@ -182,11 +184,9 @@ class responseMsg
         if ($menu == "8") {
             if (!$eventkey) {
                 $rowcheck = $db->query("SELECT * from wx_user_info where wx_openID=:wx_openID order by id desc  LIMIT 0,1", array("wx_openID" => $fromUsername));
-                if (strtotime($rowcheck[0]['endtime']) > strtotime("2016-03-10 21:07:00")) {
+                if (strtotime($rowcheck[0]['endtime']) > strtotime("2016-03-14 21:07:00")) {
                     $uid = "627A7778313233";
                 }
-//                $row = mysql_fetch_array(mysql_query("SELECT * from wx_user_info where wx_openID='" . $fromUsername . "' order by id desc  LIMIT 0,1", $link));
-
             }
         }
 
@@ -199,13 +199,13 @@ class responseMsg
             if ($url != '') {
                 if (strstr($url, '?') != '') {
                     //	$url=$url."&shop_eventkey=".return_user_info($fromUsername,"eventkey")."&wxnumber=".$fromUsername."&coupon=".$coupon_code."&market_eventkey=".$eventkey."&uid=".$uid;
-                    $url = $url . "&shop_eventkey=" . return_user_info($fromUsername, "eventkey") . "&wxnumber=" . $fromUsername . "&market_eventkey=" . $eventkey . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "&shop_eventkey=" . return_user_info($fromUsername, "eventkey") . "&wxnumber=" . $wxnumber . "&market_eventkey=" . $eventkey . "&uid=" . $uid . "&wpay=1";
                 } else {
                     //	  $url=$url."?wxnumber=".$fromUsername."&coupon=".$coupon_code."&shop_eventkey=".return_user_info($fromUsername,"eventkey")."&market_eventkey=".$eventkey."&uid=".$uid;
-                    $url = $url . "?wxnumber=" . $fromUsername . "&shop_eventkey=" . return_user_info($fromUsername, "eventkey") . "&market_eventkey=" . $eventkey . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "?wxnumber=" . $wxnumber . "&shop_eventkey=" . return_user_info($fromUsername, "eventkey") . "&market_eventkey=" . $eventkey . "&uid=" . $uid . "&wpay=1";
                 }
             } else {
-                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $fromUsername;
+                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $wxnumber;
             }
             @$PicUrl = check_picurl($result['picurl']);
             @$PicUrl_Small = $result['picUrl_Small'];
@@ -230,6 +230,7 @@ class responseMsg
      */
     public function request_subscribe($fromUsername, $toUsername, $eventkey)
     {
+        $wxnumber = authcode($fromUsername,'ENCODE',0);
         if (!$eventkey or $eventkey == "") {
             $eventkey = "all";
         } else {
@@ -270,12 +271,12 @@ class responseMsg
             $url = $result['url'];
             if ($url != '') {
                 if (strstr($url, '?') != '') {
-                    $url = $url . "&wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "&wxnumber=" . $wxnumber . "&uid=" . $uid . "&wpay=1";
                 } else {
-                    $url = $url . "?wxnumber=" . $fromUsername . "&uid=" . $uid . "&wpay=1";
+                    $url = $url . "?wxnumber=" . $wxnumber . "&uid=" . $uid . "&wpay=1";
                 }
             } else {
-                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $fromUsername;
+                $url = "http://weix.hengdianworld.com/article/articledetail.php?id=" . $result['id'] . "&wxnumber=" . $wxnumber;
             }
             @$PicUrl = check_picurl($result['picurl']);
             @$PicUrl_Small = $result['picUrl_Small'];
