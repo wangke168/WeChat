@@ -30,5 +30,6 @@ $db = new DB();
 
 
 $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
-$row = $db->query("INSERT INTO wx_order_confirm (WX_OpenID,SellID,eventkey) VALUES (:fromUsername,:sellid,:eventkey)", array("fromUsername" => $fromUsername, "sellid" => $sellid, "eventkey" => $eventkey));
+$focusdate= return_user_info($fromUsername, "AddDate");  //获取客人关注时间
+$row = $db->query("INSERT INTO wx_order_confirm (WX_OpenID,SellID,eventkey,focusdate) VALUES (:fromUsername,:sellid,:eventkey,:focusdate)", array("fromUsername" => $fromUsername, "sellid" => $sellid, "eventkey" => $eventkey,"focusdate"=>$focusdate));
 

@@ -184,7 +184,8 @@ class responseMsg
         if ($menu == "8") {
             if (!$eventkey) {
                 $rowcheck = $db->query("SELECT * from wx_user_info where wx_openID=:wx_openID order by id desc  LIMIT 0,1", array("wx_openID" => $fromUsername));
-                if (strtotime($rowcheck[0]['endtime']) > strtotime("2016-03-14 21:07:00")) {
+                $differs_days=(strtotime("now")-strtotime($rowcheck[0]['endtime']))/86400;
+                if ($differs_days<=7) {
                     $uid = "627A7778313233";
                 }
             }

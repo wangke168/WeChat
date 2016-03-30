@@ -22,6 +22,11 @@ $xjson = "{
                \"type\":\"click\",
                \"name\":\"住在横店\",
                \"key\":\"5\"
+            },
+			{
+               \"type\":\"view\",
+               \"name\":\"百礼挑一预约\",
+               \"url\":\"http://e.hengdianworld.com/freeticket/default.aspx\"
             }]
        },
        {
@@ -46,11 +51,6 @@ $xjson = "{
                \"type\":\"view\",
                \"name\":\"订单查询\",
                \"url\":\"http://e.hengdianworld.com/yd_search.aspx\"
-            },
-			{
-               \"type\":\"view\",
-               \"name\":\"礼品卡激活\",
-               \"url\":\"http://weix.hengdianworld.com/article/articledetail.php?id=162\"
             }]
        },
        {
@@ -84,7 +84,10 @@ $xjson = "{
        }]
  }";
           //https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx3e632d57ac5dcc68&secret=5bc0ddd4d88d904c9b24131fa9227f81
-$url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=-LPP7dR2MTayT2yxI2tSH1GYOw4tiC2HhFi5RunubwGnUF2RtwIOcrFtpQDcV1rqlgPgX2W_73ncHNCkof8OZKGhx_CpgsJ5hMND_KFH_zXoRm4ARgFOALK-LsRWnEU7JWJiAAAFSF";
+
+$token_url="http://weix2.hengdianworld.com/server/wechat/inc/gettoken.php";
+$accessToken=file_get_contents($token_url);
+$url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=".$accessToken;
 $result = vpost($url,$xjson);
 var_dump($result);
  

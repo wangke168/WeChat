@@ -7,6 +7,7 @@
  * Time: 8:57
  *
  * 加密解密
+ * 未使用，用了function.php里的authcode函数加密解密
  */
 class encrypt
 {

@@ -20,7 +20,7 @@ class smart
     {
         $db = new DB();
         $response = new responseMsg();
-        $row = $db->query("Select * from wx_location_list where id <5");
+        $row = $db->query("Select * from wx_location_list");
         foreach ($row as $result) {
             $aaa = explode(',', $result["show_time"]);
             $prevtime = "";
@@ -28,54 +28,49 @@ class smart
 //        if (strtotime($bbb)-(strtotime("now"))/60)
                 $temptime = (strtotime($bbb) - strtotime("now")) / 60;
                 if ($temptime < 30 && $temptime>0) {
-                    $row1 = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days and UNIX_TIMESTAMP(endtime)>=:endtime order by id desc", array("eventkey" => $result['eventkey'], "days" => date('Y-m-d'),"endtime"=>strtotime($prevtime)));
+                    $row1 = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days and UNIX_TIMESTAMP(endtime)>=:endtime order by id desc",
+                        array("eventkey" => $result['eventkey'], "days" => date('Y-m-d'),"endtime"=>strtotime($prevtime)));
                     foreach ($row1 as $ccc) {
                         $response->responseV_Text($ccc["wx_openID"], "您好，" .$result["zone_id"]."景区". $result["show_name"]."的演出时间是".$bbb."。还没到剧场的话要抓紧了哦。\n如果您不知道剧场位置，<a href='".$result["location_url"]."'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
                         $response->responseV_News($ccc['wx_openID'], $result["show_name"], "2");
                     }
+
+
+                    /*检查景区eventkey下有没有其他二维码，例：龙帝惊临项目在秦王宫里，因此龙帝惊临和秦王宫的二维码是从属关系，扫龙帝惊临的二维码也能收到秦王宫的节目提醒*/
+                    $qrscene_id=$this->get_eventkey_info($result['eventkey']);
+                    if($qrscene_id)
+                    {
+                        foreach($qrscene_id as $key=>$eventkey)
+                        {
+                            $row2 = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days and UNIX_TIMESTAMP(endtime)>=:endtime order by id desc",
+                                array("eventkey" => $eventkey, "days" => date('Y-m-d'),"endtime"=>strtotime($prevtime)));
+                            foreach ($row2 as $ddd) {
+                                $response->responseV_Text($ddd["wx_openID"], "您好，" .$result["zone_id"]."景区". $result["show_name"]."的演出时间是".$bbb."。还没到剧场的话要抓紧了哦。\n如果您不知道剧场位置，<a href='".$result["location_url"]."'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
+                                $response->responseV_News($ddd['wx_openID'], $result["show_name"], "2");
+                            }
+                        }
+                    }
+
                 }
                 $prevtime=$bbb;
-//                    echo    $bbb;
-//        echo strtotime($bbb)."...".strtotime("now")."<br>";
-//        echo $bbb."<br>";
             }
-
-//    echo $result["show_time"];
         }
     }
 
-    public function send_showtime1($showid)
+    private function get_eventkey_info($parentid)
     {
+        $a=array();
         $db = new DB();
-        $response = new responseMsg();
-        switch ($showid) {
-            case "m1":
-                $row = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days   order by id desc", array("eventkey" => "8888", "days" => date('Y-m-d')));
-                foreach ($row as $result) {
-                    $response->responseV_Text($result['wx_openID'], "您好，明清宫苑“紫禁大典”节目还有20分钟就要开始了，还没到剧场的话要抓紧了哦。\n如果您不知道剧场位置，<a href='http://l.map.qq.com/11654882773?m'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
-                    $response->responseV_News($result['wx_openID'], "紫禁大典", "2");
-                }
-                break;
-            case "m2":
-                $row = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days   order by id desc", array("eventkey" => "8888", "days" => date('Y-m-d')));
-                foreach ($row as $result) {
-                    $response->responseV_Text($result['wx_openID'], "您好，明清宫苑“八旗马战”节目还有20分钟就要开始了，还没到演武场的话要抓紧了哦。\n如果您不知道演武场位置，<a href='http://l.map.qq.com/11681206512?m'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
-                    $response->responseV_News($result['wx_openID'], "八旗马战", "2");
-                }
-                break;
-            case "m3":
-                $row = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days   order by id desc", array("eventkey" => "8888", "days" => date('Y-m-d')));
-                foreach ($row as $result) {
-                    $response->responseV_Text($result['wx_openID'], "您好，明清宫苑“清宫秘戏”节目还有20分钟就要开始了，还没到湖广会馆的话要抓紧了哦。\n如果您不知道湖广会馆位置，<a href='http://l.map.qq.com/11681208964?m'>点我</a>\n微信演出时间有时无法及时更新，以景区公示为准。");
-                    $response->responseV_News($result['wx_openID'], "清宫秘戏", "2");
-                }
-                break;
-            case "m4":
-                $row = $db->query("SELECT * from wx_user_info where eventkey=:eventkey  and scandate = :days   order by id desc", array("eventkey" => "8888", "days" => date('Y-m-d')));
-                foreach ($row as $result) {
-                    $response->responseV_Text($result['wx_openID'], "您好，明清宫苑“康熙巡游”节目还有20分钟就要开始了，还没到指定地点的话要抓紧了哦。\n微信演出时间有时无法及时更新，以景区公示为准。");
-                }
-                break;
+        $row = $db->query("select Qrscene_id from wx_qrscene_info where parent_ID=:parent_ID", array("parent_ID" => $parentid));
+        if ($row) {
+            foreach ($row as $result) {
+                $a[] = $result["Qrscene_id"];
+            }
+            return $a;
+        }
+        else{
+            return false;
         }
     }
+
 } 

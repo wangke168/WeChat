@@ -6,7 +6,7 @@ require_once("classes/handle.class.php");
 require_once("classes/Db.class.php");
 require_once("classes/active.class.php");
 require_once("classes/tour.class.php");
-
+require_once("classes/query.class.php");
 
 define("TOKEN", "hdtravel");
 define("AppID", "wx3e632d57ac5dcc68");

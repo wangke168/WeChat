@@ -29,12 +29,13 @@ class handle
             case "a":
                 $responseMsg->responseV_Text($fromUsername, return_user_info($fromUsername, 'eventkey'));
                 break;
+            case "预约":
+                $query=new query();
+                $query->query_wite_info($fromUsername);
+                break;
             case "hx":
                 $tour=new tour();
                 $responseMsg->responseV_Text($fromUsername,$tour->track_info($fromUsername,"1"));
-                break;
-            case "刮刮乐":
-                Query_ggl($fromUsername);
                 break;
             default:
                 $responseMsg->request_keyword($postObj);
@@ -60,6 +61,10 @@ class handle
                 if (substr($eventkey, 0, 7) == 'qrscene') {
                     $eventkey = substr($eventkey, 8);
                 }
+                else
+                {
+                    $eventkey="";
+                }
 
                 $responseMsg->request_subscribe($fromUsername, $toUsername, $eventkey);
 
@@ -68,10 +73,6 @@ class handle
                 break;
             case "SCAN":
                 $eventkey = $object->EventKey;
-                if (substr($eventkey, 0, 7) == 'qrscene') {
-                    $eventkey = substr($eventkey, 8);
-                }
-
 
                 $responseMsg->responseV_News($fromUsername, $eventkey, "1");
                 insert_user_info($fromUsername, $eventkey, "SCAN");

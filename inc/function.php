@@ -119,7 +119,13 @@ function return_user_info($fromUsername, $type)
 {
     $db = new DB();
     $row = $db->row("select * from WX_User_Info where wx_openid=:fromUsername order by id desc LIMIT 0,1", array("fromUsername" => $fromUsername));
-    return $row[$type];
+    if($row)
+    {
+        return $row[$type];
+    }
+    else{
+        return "";
+    }
 }
 
 

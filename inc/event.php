@@ -19,9 +19,6 @@ function insert_user_info($fromUsername, $eventkey, $type)
     $province = $data['province'];
     $country = $data['country'];
     $subscribe_time = $data['subscribe_time'];
-    if (substr($eventkey, 0, 7) == 'qrscene') {
-        $eventkey = substr($eventkey, 8);
-    }
 
     //////////////////////////////////
 

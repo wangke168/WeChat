@@ -197,7 +197,7 @@ class tour
         if (!$row) {
             return "您的号码有误，请联系工作人员。";
         } elseif ($row[0]["used"] == "1") {
-            return "不能重复核销。";
+            return "不能重复游玩。";
         } else {
             /*查询是否符合核销条件（当天，一小时前）*/
             $row1 = $db->query("select * from tour_project_wait_detail WHERE wx_openid=:wx_openid AND project_id=:project_id AND  used=:used AND date(addtime)=:tempdate  AND UNIX_TIMESTAMP(addtime)<=:endtime",

@@ -7,8 +7,6 @@ require("function.php");
 */
 
 
-
-
 $sellid = $_GET['sellid'];
 //	$sellid="V1409140222";
 //	$fromUsername = "o2e-YuBgnbLLgJGMQykhSg_V3VRI";
@@ -19,12 +17,14 @@ $db = new DB();
 
 if (check_order($sellid)) {
     $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
-    $row = $db->query("INSERT INTO WX_Order_Send (WX_OpenID,SellID,eventkey) VALUES (:fromUsername,:sellid,:eventkey)", array("fromUsername" => $fromUsername,"sellid" => $sellid,"eventkey" => $eventkey));
-    if (!check_order($sellid)) {
-        $ACCESS_TOKEN = get_access_token();
-        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" . $ACCESS_TOKEN;
-        vpost($url, Repost_order($sellid, $fromUsername));
-    }
+    $focusdate = return_user_info($fromUsername, "AddDate");  //获取客人关注时间
+    $row = $db->query("INSERT INTO WX_Order_Send (WX_OpenID,SellID,eventkey,focusdate) VALUES (:fromUsername,:sellid,:eventkey,:focusdate)",
+        array("fromUsername" => $fromUsername, "sellid" => $sellid, "eventkey" => $eventkey, "focusdate" => $focusdate));
+//    if (!check_order($sellid)) {
+    $ACCESS_TOKEN = get_access_token();
+    $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" . $ACCESS_TOKEN;
+    vpost($url, Repost_order($sellid, $fromUsername));
+//    }
 }
 
 
@@ -62,6 +62,14 @@ function Repost_order($sellid, $fromUsername)
             $date = $data['ticketorder'][$j]['date2'];
             $ticket = $data['ticketorder'][$j]['ticket'];
             $numbers = $data['ticketorder'][$j]['numbers'];
+
+            $flag = $data['ticketorder'][$j]['flag'];
+
+            if ($flag == "未支付" || $flag == "已取消") {
+                break;
+            }
+
+
 //          $ticketorder=$data['ticketorder'][$j]['code'];
 
             if ($data['ticketorder'][$j]['ticket'] == '三大点+梦幻谷' || $data['ticketorder'][$j]['ticket'] == '网络联票+梦幻谷') {
@@ -122,6 +130,13 @@ function Repost_order($sellid, $fromUsername)
             $ticket = $data['inclusiveorder'][$j]['ticket'];
             $hotel = $data['inclusiveorder'][$j]['hotel'];
 
+            $flag = $data['inclusiveorder'][$j]['flag'];
+
+            if ($flag == "未支付" || $flag == "已取消") {
+                break;
+            }
+
+
             $remark = "人数：" . $data['inclusiveorder'][$j]['numbers'] . "\\n\\n预达日凭身份证到酒店前台取票。如有疑问，请致电4009999141。";
 
 
@@ -166,13 +181,24 @@ function Repost_order($sellid, $fromUsername)
     if ($hotelcount <> 0) {
         for ($j = 0; $j < $hotelcount; $j++) {
             $i = $i + 1;
-            $first = "        " . $data['hotelorder'][$j]['name'] . "，您好，您已经成功预订" . $data['hotelorder'][$j]['hotel'] . "，酒店所有工作人员静候您的光临。\\n";
+//            $first = "        " . $data['hotelorder'][$j]['name'] . "，您好，您已经成功预订" . $data['hotelorder'][$j]['hotel'] . "，酒店所有工作人员静候您的光临。\\n";
             $sellid = $data['hotelorder'][$j]['sellid'];
+            $name = $data['hotelorder'][$j]['name'];
             $date = $data['hotelorder'][$j]['date2'];
             $days = $data['hotelorder'][$j]['days'];
             $hotel = $data['hotelorder'][$j]['hotel'];
             $numbers = $data['hotelorder'][$j]['numbers'];
             $roomtype = $data['hotelorder'][$j]['roomtype'];
+
+            $flag = $data['hotelorder'][$j]['flag'];
+
+            if ($flag == "未支付" || $flag == "已取消") {
+                break;
+            }
+
+
+            $first = "        " . $name . "，您好，您已经成功预订" . $hotel . "，酒店所有工作人员静候您的光临。\\n";
+
             $remark = "\\n        预达日凭身份证到酒店前台办理入住办手续。\\n如有疑问，请致电4009999141。";
             $xjson = "{
 		\"touser\":\"" . $fromUsername . "\",
