@@ -63,9 +63,9 @@ $signPackage = $jssdk->GetSignPackage();
                 $(".info").html("您所在位置:秦王宫");
             }
             /*影视城位置以下可注释*/
-            else if (weidu > 29.154 && weidu < 29.1549 && jingdu > 120.312 && jingdu < 120.313) {
+            /*else if (weidu > 29.154 && weidu < 29.1549 && jingdu > 120.312 && jingdu < 120.313) {
                 $(".info").html("您所在位置:横店影视城有限公司");
-            }
+            }*/
             /*影视城位置以上可注释*/
             else {
                 $(".info").html("您不在秦王宫范围");
@@ -93,7 +93,7 @@ $signPackage = $jssdk->GetSignPackage();
 	
         /*取号*/
         function getqh() {
-            if ($(".info").text() == "您不在秦王宫范围") {
+            if ($(".info").text() != "您所在位置:秦王宫") {
                 $(".overdiv").show(1)
                     .find(".closebtn").show(1)
                     .nextAll("span").html("您好，只有在秦王宫才能预约,如果您确认在景区请点击点位按钮重新获取您的位置。");
