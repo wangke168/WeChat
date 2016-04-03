@@ -36,7 +36,7 @@ class responseMsg
      */
     public function responseV_News($fromUsername, $keyword, $type)
     {
-        $wxnumber = authcode($fromUsername,'ENCODE',0);
+        $wxnumber = authcode($fromUsername, 'ENCODE', 0);
         $db = new DB();
         switch ($type) {
             case "1":
@@ -49,8 +49,8 @@ class responseMsg
                 }
                 break;
             case "2":
-                $uid = query_qr_uid(return_user_info($fromUsername, "eventkey"));  //获取客人uid
-                $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
+                $uid = query_qr_uid(return_user_info($fromUsername, "eventkey")); //获取客人uid
+                $eventkey = return_user_info($fromUsername, "eventkey"); //获取客人所属市场
                 break;
         }
 
@@ -124,10 +124,10 @@ class responseMsg
         $fromUsername = $postObj->FromUserName;
         $keyword = trim($postObj->Content);
         $db = new DB();
-        $eventkey = return_user_info($fromUsername, "eventkey");  //获取客人所属市场
+        $eventkey = return_user_info($fromUsername, "eventkey"); //获取客人所属市场
 
         /*先判断关键词，是否接入多客服*/
-        if (strstr($keyword, "您好") || strstr($keyword, "你好") || strstr($keyword, "在吗") || strstr($keyword, "有人吗")) {
+        if ($this->check_Kefu($postObj)) {
             $result = $this->transmitKefu($postObj);
             echo $result;
         } else {
@@ -171,10 +171,10 @@ class responseMsg
      */
     public function request_menu($fromUsername, $toUsername, $menu)
     {
-        $wxnumber = authcode($fromUsername,'ENCODE',0);
+        $wxnumber = authcode($fromUsername, 'ENCODE', 0);
         $db = new DB();
         $uid = "";
-        $eventkey = return_eventkey_info(return_user_info($fromUsername, "eventkey"));  //获取客人所属市场
+        $eventkey = return_eventkey_info(return_user_info($fromUsername, "eventkey")); //获取客人所属市场
         if (check_order_number($eventkey) == true) {
             $uid = query_qr_uid(return_user_info($fromUsername, "eventkey"));
         }
@@ -184,8 +184,8 @@ class responseMsg
         if ($menu == "8") {
             if (!$eventkey) {
                 $rowcheck = $db->query("SELECT * from wx_user_info where wx_openID=:wx_openID order by id desc  LIMIT 0,1", array("wx_openID" => $fromUsername));
-                $differs_days=(strtotime("now")-strtotime($rowcheck[0]['endtime']))/86400;
-                if ($differs_days<=7) {
+                $differs_days = (strtotime("now") - strtotime($rowcheck[0]['endtime'])) / 86400;
+                if ($differs_days <= 7) {
                     $uid = "627A7778313233";
                 }
             }
@@ -231,7 +231,7 @@ class responseMsg
      */
     public function request_subscribe($fromUsername, $toUsername, $eventkey)
     {
-        $wxnumber = authcode($fromUsername,'ENCODE',0);
+        $wxnumber = authcode($fromUsername, 'ENCODE', 0);
         if (!$eventkey or $eventkey == "") {
             $eventkey = "all";
         } else {
@@ -312,7 +312,7 @@ class responseMsg
                 $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus = :focus  and audit=:audit and online=:online and  eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => $eventkey, "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
                 break;
             case "2":
-                $eventkey = return_eventkey_info(return_user_info($keyword, "eventkey"));  //获取客人所属市场
+                $eventkey = return_eventkey_info(return_user_info($keyword, "eventkey")); //获取客人所属市场
                 $row = $db->query("SELECT * from wx_article where msgtype=:msgtype and focus =:focus  and audit=:audit and online=:online and  eventkey=:eventkey  and startdate<=:startdate and enddate>=:enddate  order by priority asc,id desc  LIMIT 0,10", array("msgtype" => "news", "focus" => "1", "audit" => "1", "online" => "1", "eventkey" => $eventkey, "startdate" => date('Y-m-d'), "enddate" => date('Y-m-d')));
                 break;
         }
@@ -434,6 +434,32 @@ class responseMsg
 				</xml>";
         $resultStr = sprintf($textTpl, $FromUserName, $ToUserName, time(), $content);
         return $resultStr;
+    }
+
+    /*
+     *
+     * 判断是否需要接入客服
+     */
+    private function  check_Kefu($postObj)
+    {
+        $fromUsername = $postObj->FromUserName;
+        $keyword = trim($postObj->Content);
+
+        if (strstr($keyword, "您好") || strstr($keyword, "你好") || strstr($keyword, "在吗") || strstr($keyword, "有人吗")) {
+//            $result = $this->transmitKefu($postObj);
+//            echo $result;
+            return true;
+        } else {
+            $db = new DB();
+            $row = $db->query("select * from wx_order_kefu where wx_openid=:fromUsername and date(adddate)=:today",
+                array("fromUsername" => $fromUsername, "today" => date('Y-m-d')));
+            if ($row) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
     }
 
     /***************************************

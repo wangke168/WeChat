@@ -16,6 +16,8 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+settings.ini.php
+temp.php
 mysql.php
 
 
